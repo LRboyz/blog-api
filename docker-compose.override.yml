@@ -1,0 +1,32 @@
+version: '3'
+services:
+  web:
+    volumes:
+      - ./app:/app
+    ports:
+      - "80:80"
+    environment:
+      - FLASK_APP=manage.py
+      - FLASK_DEBUG=1
+      - 'RUN=flask run --host=0.0.0.0 --port=80'
+    command: flask run --host=0.0.0.0 --port=80
+    depends_on: 
+      - mongo
+    links: 
+      - mongo
+    # 无限循环，使其保持活动状态，以便进行调试
+    # 命令：bash -c“ while为true时，执行echo'sleeping ...'&& sleep 10; done”
+  mongo:
+    image: mongo:4.2-bionic
+    container_name: mongo_blog
+    restart: always
+    ports:
+      - 27017:27017
+#    volumes:
+#      - './data/db:/data/db'
+    # command: mongod --auth
+    # environment:
+    # - MONGO_INITDB_ROOT_USERNAME=root
+    # - MONGO_INITDB_ROOT_PASSWORD=123456
+    tty: true
+    privileged: true

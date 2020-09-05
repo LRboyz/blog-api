@@ -3,22 +3,12 @@
 用户模型
 """
 from flask import request
-from hashlib import md5
 from flask import current_app, g
-# from flask_login import UserMixin
 from mongoengine import *
 from werkzeug.security import generate_password_hash, check_password_hash
 import datetime
 from apps import db
 from apps.core.error import NotFound, ParameterException
-
-
-# USER_ROLE = {
-#     300: '超级管理员',
-#     100: '协管员',
-#     0: '普通用户',
-# }
-from apps.models.permissions import append_permission
 
 
 class User(db.DynamicDocument):
@@ -47,20 +37,26 @@ class User(db.DynamicDocument):
         return super(User, self).save(*args, **kwargs)
 
     def to_dict(self):
-        user_dict = {
-            "user_id": str(self.id),
-            "username": self.username,
-            "nickname": self.nickname,
-            "avatar": self.avatar,
-            "create_time": self.create_time,
-            "permissions": self.permissions,
-            "role": self.role,
-            "is_superuser": self.is_superuser,
-            "last_login": self.last_login,
-            "email": self.email,
-            "ip": self.ip
-        }
+        user_dict = self.to_mongo().to_dict()
+        user_dict['id'] = user_dict['_id']
+        del user_dict['_id']
         return user_dict
+
+    # def to_dict(self):
+    #     user_dict = {
+    #         "user_id": str(self.id),
+    #         "username": self.username,
+    #         "nickname": self.nickname,
+    #         "avatar": self.avatar,
+    #         "create_time": self.create_time,
+    #         "permissions": self.permissions,
+    #         "role": self.role,
+    #         "is_superuser": self.is_superuser,
+    #         "last_login": self.last_login,
+    #         "email": self.email,
+    #         "ip": self.ip
+    #     }
+    #     return user_dict
 
     @property  # 这个装饰器起到只读的作用
     def set_avatar(self):
@@ -129,3 +125,6 @@ class User(db.DynamicDocument):
             return request.headers['Cdn-Real-Ip']
 
         return request.environ.get('HTTP_X_REAL_IP', request.remote_addr)
+
+
+    # pass

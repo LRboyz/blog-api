@@ -9,7 +9,7 @@ tag_api = Blueprint('tag', __name__)
 
 
 @tag_api.route('/list/', methods=['GET'])
-@login_required
+# @login_required
 def get_all_tag():
     items, total = Tag.get_tags()
     return jsonify(items=items, error_code=0, total=total)

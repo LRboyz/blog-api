@@ -38,7 +38,7 @@ class LocalUploader(Uploader):  # 这个是把图片保存到本地的形式
                     name=real_name,
                     path=relative_path,
                     extension=self._get_ext(single.filename),  # single.filename: 获取文件后缀名
-                    size=self._get_size(single),
+                    size=self._get_size(single),  
                     md5=file_md5
                 )
                 ret.append({

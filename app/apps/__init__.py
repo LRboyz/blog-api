@@ -23,6 +23,7 @@ def register_blueprints(app):
     """
     加载蓝图 apps.register_blueprint(user, url_prefix='/user')    # 注册user蓝图，并指定前缀。
     """
+    # CMS管理系统模块API
     from apps.views.cms.test import test
     from apps.views.cms.book import book_api
     from apps.views.cms.user import user_api
@@ -32,6 +33,12 @@ def register_blueprints(app):
     from apps.views.cms.post import post_api
     from apps.views.cms.category import cat_api
     from apps.views.cms.admin import admin_api
+
+    # 博客前端模块API
+    from apps.views.blog.index import blog_api
+    from apps.views.blog.articleDetail import article_api
+    from apps.views.blog.comment import comment_api
+
     app.register_blueprint(test, url_prefix='/test')
     app.register_blueprint(user_api, url_prefix='/user')
     app.register_blueprint(log_api, url_prefix='/v1')
@@ -41,6 +48,10 @@ def register_blueprints(app):
     app.register_blueprint(post_api, url_prefix='/post')
     app.register_blueprint(cat_api, url_prefix='/category')
     app.register_blueprint(admin_api, url_prefix='/admin')
+
+    app.register_blueprint(blog_api, url_prefix='/blog')
+    app.register_blueprint(article_api, url_prefix='/article')
+    app.register_blueprint(comment_api, url_prefix='/blog/comment')
 
 
 def create_app(environment='development'):

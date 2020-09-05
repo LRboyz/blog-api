@@ -7,6 +7,7 @@ from apps.core.token_auth import admin_required
 from apps.models.permissions import append_permission
 from apps.models.user import User
 from apps.utils import paginate
+from apps.utils.logger import Logger
 from apps.validaters.forms import AdminUpdateInfoForm, ResetPasswordForm
 
 admin_api = Blueprint('admin', __name__)
@@ -29,19 +30,17 @@ def user_list():
 
 
 @admin_api.route('/<uid>', methods=['PUT'])
+@Logger(template='{user.username}修改了信息')
 @admin_required
 def edit_info(uid):
     form = AdminUpdateInfoForm().validate_for_api()
-    # exists = User.objects(email=form.email.data).first()
     user = User.objects(id=uid).first()
     user.update(set__email=form.email.data, set__role=form.role.data)
     return Success(msg='信息修改成功！')
-    # if exists:
-    #     raise ParameterException(msg='邮箱已被注册，请重新输入邮箱')
-    # else:
 
 
 @admin_api.route('/password/<uid>', methods=['PUT'])
+@Logger(template='{user.username}修改了密码')
 @admin_required
 def update_password(uid):
     form = ResetPasswordForm().validate_for_api()
@@ -51,6 +50,7 @@ def update_password(uid):
 
 
 @admin_api.route('/<uid>', methods=['DELETE'])
+@Logger(template='{user.username}删除了一个用户')
 @admin_required
 def delete_info(uid):
     info = User.objects(id=ObjectId(uid)).first()

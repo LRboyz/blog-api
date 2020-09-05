@@ -1,14 +1,20 @@
 # -*- coding:utf-8 -*-
+import datetime
 from time import time
 from hashlib import md5
+
+from bson import ObjectId
 from flask import Blueprint, jsonify, request
 from flask_jwt_extended import get_current_user, verify_jwt_refresh_token_in_request, get_jwt_identity, \
     create_access_token, create_refresh_token
 from werkzeug.security import generate_password_hash
 from apps.core.error import RepeatException, Success, ParameterException, RefreshException, NotFound, Failed
 from apps.core.token_auth import get_tokens, login_required
+from apps.models.category import Category
 from apps.models.log import Log
 from apps.models.permissions import append_permission
+from apps.models.post import Post
+from apps.models.tag import Tag
 from apps.models.user import User
 from apps.utils.logger import Logger
 from apps.validaters.forms import RegisterForm, LoginForm, UpdateInfoForm, AvatarUpdateForm, ChangePasswordForm
@@ -17,6 +23,7 @@ user_api = Blueprint('user', __name__)
 
 
 @user_api.route('/register', methods=['POST'])
+# @Logger(template='{user.username}创建了一个用户')
 def register():
     form = RegisterForm().validate_for_api()
     user = User.objects(username=form.username.data).first()
@@ -33,8 +40,9 @@ def register():
 @user_api.route('/token', methods=['POST'])
 def get_token():
     form = LoginForm().validate_for_api()
-    user = User.verify(form.username.data, form.password.data)
-    access_token, refresh_token = get_tokens(user)
+    user_id = User.verify(form.username.data, form.password.data)
+    access_token, refresh_token = get_tokens(user_id)
+    User.objects(id=ObjectId(user_id['uid'])).update(last_login=datetime.datetime.now())  # 记录最后登陆时间
     return jsonify(access_token=access_token, refresh_token=refresh_token), 201
 
 
@@ -61,6 +69,12 @@ def get_info():
     user_info['permissions'] = append_permission(user.role)
     user_info['is_superuser'] = True if user.role == 300 else False
     data = User.to_dict(user_info)
+    article_count = Post.objects.count()
+    category_count = Category.objects.count()
+    tag_count = Tag.objects.count()
+    data['article_count'] = article_count
+    data['category_count'] = category_count
+    data['tag_count'] = tag_count
     Log.create_log(
         message=f'{user.username}登陆成功获取了令牌',
         user_id=str(user.id), user_name=user.username, create_time=int(time()*1000),
@@ -74,21 +88,12 @@ def get_info():
 def update_user():
     form = UpdateInfoForm().validate_for_api()
     user = get_current_user()
-    # if form.email.data and user.email != form.email.data:
-    #     exists = User.objects(id=user.id).first()
-    #     if exists:
-    #         raise ParameterException(msg='邮箱已被注册，请重新输入邮箱')
     user = User.objects(id=user.id).first()
     if user.nickname is None:
         user.nickname = form.nickname.data
         user.save()
     else:
         user.update(set__nickname=form.nickname.data)
-    # if user.email is None:
-    #     user.email = form.email.data
-    #     user.save()
-    # else:
-    #     user.update(set__email=form.email.data)
     return Success(msg='操作成功')
 
 

@@ -19,7 +19,7 @@ class DevelopmentConfig(BaseConfig):
     DEBUG = False
     # Token 配置
     # 令牌配置
-    JWT_ACCESS_TOKEN_EXPIRES = timedelta(hours=2)
+    JWT_ACCESS_TOKEN_EXPIRES = timedelta(hours=2400)
     # 数据库配置
     MONGODB_DB = 'blog'
     MONGODB_HOST = 'localhost'

@@ -27,17 +27,22 @@ class Log(db.DynamicDocument):
     #     self.create_time = int(round(time.time()))
 
     def to_dict(self):
-        log_dict = {
-            "user_id": str(self.id),
-            "message": self.message,
-            "user_name": self.user_name,
-            "status_code": self.status_code,
-            "method": self.method,
-            "create_time": self.create_time,
-            "path": self.path,
-            "ip_addr": self.ip_addr
-        }
+        log_dict = self.to_mongo().to_dict()
+        log_dict['user_id'] = log_dict['_id']
         return log_dict
+
+    # def to_dict(self):
+    #     log_dict = {
+    #         "user_id": str(self.id),
+    #         "message": self.message,
+    #         "user_name": self.user_name,
+    #         "status_code": self.status_code,
+    #         "method": self.method,
+    #         "create_time": self.create_time,
+    #         "path": self.path,
+    #         "ip_addr": self.ip_addr
+    #     }
+    #     return log_dict
 
     @staticmethod
     def create_log(**kwargs):

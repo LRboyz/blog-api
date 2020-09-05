@@ -27,22 +27,19 @@ class Tag(db.DynamicDocument):
     }
 
     def to_dict(self):
-        j = self.to_json()
-        dicts = json.loads(j)
-        dicts['id'] = dicts['_id']['$oid']  # 查出来的id字段： {'$oid': '5f0c5e6e82d8036913ac39d3'}，转成id
-        dicts['pub_time'] = self.pub_time
-        dicts['update_time'] = self.update_time
-        del dicts['_id']  # 如果要删除id，执行这个方法
-        return dicts
-        # tag_dict = {}
-        # tag_dict['id'] = str(self.id)
-        # tag_dict['article_count'] = self.article_count
-        # tag_dict['tag_name'] = self.tag_name
-        # tag_dict['alias'] = self.alias
-        # tag_dict['thumbnail'] = self.thumbnail
-        # tag_dict['status'] = self.status
-        # tag_dict['create_time'] = self.pub_time
-        # return tag_dict
+        tag_dict = self.to_mongo().to_dict()
+        tag_dict['id'] = tag_dict['_id']
+        del tag_dict['_id']
+        return tag_dict
+
+    # def to_dict(self):
+    #     j = self.to_json()
+    #     dicts = json.loads(j)
+    #     dicts['id'] = dicts['_id']['$oid']  # 查出来的id字段： {'$oid': '5f0c5e6e82d8036913ac39d3'}，转成id
+    #     dicts['pub_time'] = self.pub_time
+    #     dicts['update_time'] = self.update_time
+    #     del dicts['_id']  # 如果要删除id，执行这个方法
+    #     return dicts
 
     def save(self, *args, **kwargs):
         now = datetime.datetime.now()

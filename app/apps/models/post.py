@@ -5,16 +5,19 @@
 import datetime
 
 from bson import ObjectId
+from flask_jwt_extended import get_current_user
 from mongoengine import *
 from apps import db
 from apps.core.error import ParameterException, NotFound
-# from apps.models.tag import Tag
+from apps.models.comment import Comment
+
 from apps.models.tag import Tag
 from apps.models.user import User
 from apps.utils import paginate
 
 
-class Post(db.DynamicDocument):
+class Post(DynamicDocument):
+
     title = StringField(max_length=255, default='new blog', required=True)
     banner = StringField()  # 文章banner图
     pub_time = DateTimeField()  # 发布时间
@@ -25,12 +28,16 @@ class Post(db.DynamicDocument):
     recommend = BooleanField()  # 是否推荐
     keyword = StringField()  # 关键词
     source = StringField()  # 文章来源
-    commentsCount = IntField(default=0)
+    comments = ListField(ReferenceField(Comment))
+    commentsCount = IntField(default=0)  # 评论数量
     content = StringField(required=True)
-    author = ReferenceField(User)  # 自引用
-    category = StringField(max_length=64)
+    author = ReferenceField(User, reverse_delete_rule=db.CASCADE)  # 级联删除， 如果author被删除，则他发布的所有东西都被删除
+    category = StringField()  # ReferenceField(Category, reverse_delete_rule=db.NULLIFY)
     is_audit = BooleanField()  # 发布或拉黑
-    tags = ListField(StringField(max_length=30))
+    # author_id = StringField()
+    tags = ListField()  # ReferenceField(Tag, reverse_delete_rule=db.PULL)
+    # tags）中只有 tag01 被删除，其它标签还在，合理！
+    user_info = ReferenceField(User)
     # is_draft = db.BooleanField(default=False)  # 是否草稿
     post_type = IntField()  # 文章类型
 
@@ -46,25 +53,10 @@ class Post(db.DynamicDocument):
         return super(Post, self).save(*args, **kwargs)
 
     def to_dict(self):
-        post_dict = {}
-        post_dict['id'] = str(self.id)
-        post_dict['title'] = self.title
-        post_dict['pub_time'] = self.pub_time.strftime('%Y-%m-%d %H:%M:%S')
-        post_dict['update_time'] = self.update_time.strftime('%Y-%m-%d %H:%M:%S')
-        post_dict['content'] = self.content
-        post_dict['views'] = self.views
-        post_dict['likes'] = self.likes
-        post_dict['introduction'] = self.introduction
-        post_dict['banner'] = self.banner
-        post_dict['is_audit'] = self.is_audit
-        post_dict['commentsCount'] = self.commentsCount
-        post_dict['recommend'] = self.recommend
-        post_dict['keyword'] = self.keyword
-        post_dict['source'] = self.source
-        # post_dict['author'] = self.author.username
-        post_dict['category'] = self.category
-        post_dict['tags'] = self.tags
-        post_dict['post_type'] = self.post_type
+        post_dict = self.to_mongo().to_dict()
+        post_dict['id'] = post_dict['_id']
+        post_dict['author'] = [user.to_dict() for user in User.objects(id=ObjectId(self.author_id))]
+        del post_dict['_id']
         return post_dict
 
     @classmethod
@@ -72,10 +64,13 @@ class Post(db.DynamicDocument):
         post = cls.objects(title=form.title.data).first()
         if post is not None:
             raise ParameterException(msg='文章已存在')
-        post = Post(title=form.title.data, banner=form.banner.data,
+        user = get_current_user()
+        user_info = User.objects(id=user.id).first()
+        user_info.save()
+        post = Post(title=form.title.data, banner=form.banner.data, author_id=form.author_id.data,
                     content=form.content.data, category=form.category.data, tags=form.tags.data, recommend=
                     form.recommend.data, keyword=form.keyword.data, source=form.source.data, is_audit=form.is_audit.data
-                    , post_type=form.post_type.data, introduction=form.introduction.data)
+                    , post_type=form.post_type.data, introduction=form.introduction.data, author=user_info)
         post.save()
         if form.tags.data:  # 这个逻辑是找出来这个标签所对应的文章，用聚合查询
             tag_group = cls._get_collection().aggregate([
@@ -93,13 +88,23 @@ class Post(db.DynamicDocument):
         return True
 
     @classmethod
+    def get_detail_archive(cls):
+        cursor = Post.objects.aggregate([{'$sample': {'size': 5}}])  # 随机返回五篇文章
+        random_articles = []
+        for item in cursor:
+            item['_id'] = str(item['_id'])
+            random_articles.append(item)
+        cat_number = Post.objects.all().item_frequencies("category")  # 统计分类下的文章数量
+        return random_articles, cat_number
+
+    @classmethod
     def get_posts(cls, post_name):
         start, count = paginate()  # 获取分页配置
         if post_name:
             posts = Post.objects.filter(title__icontains=post_name)  # 查询字段包含cat_name的对象
         else:
             posts = Post.objects.skip(start).limit(count).all()  # .exclude('author')  排除某些字段
-        post = [cat.to_dict() for cat in posts]
+        post = [p.to_dict() for p in posts]
         total = posts.count()
         return post, total
 

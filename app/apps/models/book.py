@@ -3,6 +3,8 @@
 图书模型
 """
 import datetime
+import json
+
 from bson import ObjectId
 from mongoengine import *
 from apps import db
@@ -38,12 +40,9 @@ class Book(db.Document):
         return super(Book, self).save(*args, **kwargs)
 
     def to_dict(self):
-        book_dict = {}
-        book_dict['id'] = str(self.id)
-        book_dict['title'] = self.title
-        book_dict['author'] = self.author
-        book_dict['summary'] = self.summary
-        book_dict['image'] = self.image
+        book_dict = self.to_mongo().to_dict()
+        book_dict['id'] = book_dict['_id']
+        del book_dict['_id']
         return book_dict
 
     @classmethod
@@ -68,6 +67,7 @@ class Book(db.Document):
         books = Book.objects.all()  # .exclude('author')  排除某些字段
         if not books:
             raise NotFound(msg='没有找到相关书籍')
+        print(books)
         data = [book.to_dict() for book in books]
         return data
 

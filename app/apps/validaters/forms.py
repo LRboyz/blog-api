@@ -51,6 +51,7 @@ class CreatePostForm(Form):
     tags = StringField()
     keyword = StringField()
     source = StringField()
+    author_id = StringField()
     commentsCount = IntegerField(validators=[])
     category = StringField(validators=[])
     introduction = StringField(validators=[])
@@ -154,3 +155,10 @@ class CreateTagForm(Form):
 class CreateCategoryForm(Form):
     category_name = StringField(validators=[DataRequired(message='必须传入标签名称')])
     thumbnail = StringField(120)
+
+
+class CreateCommentForm(Form):
+    text = StringField(validators=[DataRequired(message='必须传入评论内容')])
+    post_id = StringField(validators=[DataRequired(message='必须传入文章id ')])
+    comment_user_id = StringField(validators=[DataRequired(message='必须传入评论人id')])
+    reply_user_id = StringField()

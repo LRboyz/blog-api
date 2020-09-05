@@ -1,5 +1,5 @@
 import datetime
-
+import json
 from bson import ObjectId
 from flask import current_app
 from mongoengine import *
@@ -21,11 +21,9 @@ class Category(db.DynamicDocument):
     }
 
     def to_dict(self):
-        cat_dict = {}
-        cat_dict['id'] = str(self.id)
-        cat_dict['category_name'] = self.category_name
-        cat_dict['thumbnail'] = self.thumbnail
-        cat_dict['create_time'] = self.pub_time
+        cat_dict = self.to_mongo().to_dict()
+        cat_dict['id'] = cat_dict['_id']
+        del cat_dict['_id']
         return cat_dict
 
     def save(self, *args, **kwargs):

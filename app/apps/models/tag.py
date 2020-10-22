@@ -13,8 +13,9 @@ from apps.utils import paginate
 class Tag(db.DynamicDocument):
     tag_name = StringField()
     article_count = IntField(default=0)  # 文章数量
-    subscriber_count = IntField()  # 订阅数
+    # subscriber_count = IntField()  # 订阅数
     view_hits = IntField()  # 查看点击
+    subscriber = ListField()  # 关注者
     thumbnail = StringField()
     status = BooleanField()
     pub_time = DateTimeField()
@@ -60,7 +61,7 @@ class Tag(db.DynamicDocument):
         exists = Tag.objects(tag_name=form.tag_name.data).first()
         if exists:
             raise RepeatException(msg="该标签名已存在")
-        tags = Tag(tag_name=form.tag_name.data, thumbnail=form.thumbnail.data, alias=form.alias.data,
+        tags = Tag(tag_name=form.tag_name.data, thumbnail=form.thumbnail.data, alias=form.remark.data,
                    status=form.status.data)
         tags.save()
         return True
@@ -69,6 +70,13 @@ class Tag(db.DynamicDocument):
     def get_tags(cls):
         start, count = paginate()  # 获取分页配置
         tags = Tag.objects.skip(start).limit(count).all()  # .exclude('author')  排除某些字段
+        items = [tag.to_dict() for tag in tags]
+        total = tags.count()
+        return items, total
+
+    @classmethod
+    def get_all_tags(cls):
+        tags = cls.objects.all()  # .exclude('author')  排除某些字段
         items = [tag.to_dict() for tag in tags]
         total = tags.count()
         return items, total

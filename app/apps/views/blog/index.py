@@ -27,7 +27,6 @@ def article_list():
     post = [p.to_dict() for p in posts]
     current_total = posts.count()
     total = Post.objects.all().count()
-    # time.sleep(3)
     return success_ret(data=post, msg='获取文章成功！', total=total, current_total=current_total)
 
 
@@ -56,6 +55,13 @@ def blog_tag_list():
     return success_ret(data=items, total=total)
 
 
+# 获取全部Tag标签列表
+@blog_api.route('tag/all', methods=['GET'])
+def blog_tag_all_list():
+    items, total = Tag.get_all_tags()
+    return success_ret(data=items, total=total)
+
+
 # 首页用户信息
 @blog_api.route('user')
 def index_user_list():
@@ -63,8 +69,12 @@ def index_user_list():
     users = User.objects.limit(10).all()
     user_list = [item.to_dict() for item in users]
     return success_ret(data=user_list, msg="获取用户信息成功")
-    # pass
 
+
+@blog_api.route('tag/subscriber/<user_id>')
+def subscriber(user_id):
+    print(user_id)
+    pass
 # 生成测试数据
 # @blog_api.route('/article/test')
 # def test_data():

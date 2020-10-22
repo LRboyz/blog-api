@@ -6,6 +6,9 @@
 
 
 # 序列化处理，排除指定字段
+from flask import jsonify
+
+
 def api_exclude(obj, *args):
     model_dict = obj.to_mongo().to_dict()
     if args:
@@ -31,12 +34,13 @@ def success_ret(msg='', data=None, code=200, **kwargs):
     请求成功时返回API结构
     :return:
     """
-    return {
+    ret = {
         'code': code,
         'msg': msg,
         'data': {} if data is None else data,
         **kwargs,
     }
+    return jsonify(ret)
 
 
 def error_ret(code, msg='', data=None, **kwargs):

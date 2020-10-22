@@ -1,6 +1,7 @@
 from bson import ObjectId
 from flask import Blueprint, jsonify, request
 from flask_jwt_extended import get_current_user
+from werkzeug.security import generate_password_hash
 
 from apps.core.error import NotFound, ParameterException, Success
 from apps.core.token_auth import admin_required
@@ -45,7 +46,7 @@ def edit_info(uid):
 def update_password(uid):
     form = ResetPasswordForm().validate_for_api()
     user = User.objects(id=uid).first()
-    user.update(set___password=form.new_password.data)
+    user.update(set___password=generate_password_hash(form.new_password.data))
     return Success(msg='密码修改成功！')
 
 

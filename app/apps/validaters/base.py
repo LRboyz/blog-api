@@ -19,6 +19,16 @@ class BaseForm(WTForm):
 
     def validate_for_api(self):
         valid = super(BaseForm, self).validate()
+        # print(valid) False
         if not valid:
-            raise ParameterException(msg=self.errors)
+            msg = self.get_errors()
+            raise ParameterException(msg=msg)
         return self
+
+    def get_errors(self):
+        errors = ''
+        for v in self.errors.values():
+            for m in v:
+                errors += m
+            errors += '\n'
+        return errors

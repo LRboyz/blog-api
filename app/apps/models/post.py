@@ -14,6 +14,7 @@ from apps.models.comment import Comment
 from apps.models.tag import Tag
 from apps.models.user import User
 from apps.utils import paginate
+from apps.utils.api_format import error_ret
 
 
 class Post(DynamicDocument):
@@ -34,7 +35,6 @@ class Post(DynamicDocument):
     author = ReferenceField(User, reverse_delete_rule=db.CASCADE)  # 级联删除， 如果author被删除，则他发布的所有东西都被删除
     category = StringField()  # ReferenceField(Category, reverse_delete_rule=db.NULLIFY)
     is_audit = BooleanField()  # 发布或拉黑
-    # author_id = StringField()
     tags = ListField()  # ReferenceField(Tag, reverse_delete_rule=db.PULL)
     # tags）中只有 tag01 被删除，其它标签还在，合理！
     user_info = ReferenceField(User)
@@ -58,6 +58,19 @@ class Post(DynamicDocument):
         post_dict['author'] = [user.to_dict() for user in User.objects(id=ObjectId(self.author_id))]
         del post_dict['_id']
         return post_dict
+
+    @classmethod
+    def first_or_404(cls, pid):
+        try:
+            res = cls.objects.with_id(pid)
+            if res is None:
+                return error_ret(msg="没有找到该文章", code=404)
+            else:
+                return res
+        except Exception as e:
+            print(e)
+
+        # pass
 
     @classmethod
     def create_article(cls, form):

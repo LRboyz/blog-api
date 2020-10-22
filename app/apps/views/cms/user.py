@@ -28,11 +28,11 @@ def register():
     form = RegisterForm().validate_for_api()
     user = User.objects(username=form.username.data).first()
     if user:
-        raise RepeatException(msg='用户名重复，请重新输入')
+        raise RepeatException(msg='该账户名已被注册，请重新输入')
     if form.email.data and form.email.data.strip() != "":
         email = User.objects(email=form.email.data).first()
         if email:
-            raise RepeatException(msg='注册邮箱重复，请重新输入')
+            raise RepeatException(msg='该邮箱已被注册，请重新输入')
     _register_user(form)
     return Success(msg="用户创建成功!", error_code=200)
 
@@ -137,10 +137,9 @@ def _register_user(form: RegisterForm):
     user.username = form.username.data
     if form.email.data and form.email.data.strip() != "":
         user.email = form.email.data
-    if form.role.data:
-        user.role = form.role.data
     user._password = generate_password_hash(form.password.data)
     user.ip = user.get_ip()
+    user.nickname = form.nickname.data
     avatar_hash = md5(user.username.encode('utf-8')).hexdigest()
     user.avatar = 'https://www.gravatar.com/avatar/%s?d=monsterid' % avatar_hash  # 生成随机小怪兽头像
     user.save()

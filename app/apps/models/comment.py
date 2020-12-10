@@ -1,12 +1,11 @@
 import datetime
-import time
 from bson import ObjectId
 from flask_jwt_extended import get_current_user
 from mongoengine import *
 from apps.models.user import User
 from apps.utils.api_format import api_fields, api_exclude
 
-COMMENT_STATUS = ('approved', 'pending', 'spam', 'deleted')
+# COMMENT_STATUS = ('public', 'invalid')  # 公开 | 无效
 
 
 class Comment(DynamicDocument):
@@ -20,7 +19,7 @@ class Comment(DynamicDocument):
     otherComments = ListField()
     create_time = DateTimeField()
     update_time = DateTimeField()
-    status = StringField(choices=COMMENT_STATUS, default='pending')
+    status = BooleanField(default=True)
     post_id = StringField()  # 文章id
     text = StringField()
     votes = IntField(default=0)

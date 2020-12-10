@@ -152,7 +152,7 @@ class LogFindForm(Form):
 
 class CreateTagForm(Form):
     tag_name = StringField(validators=[DataRequired(message='必须传入标签名称')])
-    alias = StringField(validators=[])
+    # remark = StringField(validators=[])
     status = BooleanField()
     thumbnail = StringField(120)
 
@@ -169,3 +169,9 @@ class CreateCommentForm(Form):
     post_id = StringField()
     # comment_user_id = StringField(validators=[DataRequired(message='必须传入评论人id')])
     reply_user_id = StringField()
+
+
+class UpdateComment(Form):
+    comment_id = StringField()
+    status = BooleanField()
+    text = StringField()

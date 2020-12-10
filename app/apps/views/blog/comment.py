@@ -22,7 +22,7 @@ def add_comment():
     return success_ret(msg='一级评论成功', data=api_exclude(comment, '_cls', '_id'))
 
 
-@comment_api.route('<parent_id>', methods=['POST'])
+@comment_api.route('/<parent_id>', methods=['POST'])
 @login_required
 def reply_comment(parent_id):
     form = CreateCommentForm().validate_for_api()
@@ -38,6 +38,7 @@ def reply_comment(parent_id):
 def get_comment_list():
     post_id = request.args.get('post_id')
     post = Post.objects(id=ObjectId(post_id)).first()
+    # if item['status'] == True, 本来是打算不返回=False,即拉黑的评论，但是我想前端直接显示"该评论已被管理员拉黑"应该更可观
     comment_list = [api_exclude(item, '_cls', '_id') for item in post.comments]
     total = len(comment_list)
     return success_ret(data=comment_list, total=total)

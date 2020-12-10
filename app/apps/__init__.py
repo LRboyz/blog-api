@@ -33,6 +33,7 @@ def register_blueprints(app):
     from apps.views.cms.post import post_api
     from apps.views.cms.category import cat_api
     from apps.views.cms.admin import admin_api
+    from apps.views.cms.comment import cms_comment_api
 
     # 博客前端模块API
     from apps.views.blog.index import blog_api
@@ -48,6 +49,7 @@ def register_blueprints(app):
     app.register_blueprint(post_api, url_prefix='/post')
     app.register_blueprint(cat_api, url_prefix='/category')
     app.register_blueprint(admin_api, url_prefix='/admin')
+    app.register_blueprint(cms_comment_api, url_prefix='/cms/comment')
 
     app.register_blueprint(blog_api, url_prefix='/blog')
     app.register_blueprint(article_api, url_prefix='/article')

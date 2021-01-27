@@ -8,6 +8,7 @@ from mongoengine import *
 from werkzeug.security import generate_password_hash, check_password_hash
 import datetime
 from apps.core.error import NotFound, ParameterException
+# from apps.models.comment import Comment
 
 
 class User(DynamicDocument):

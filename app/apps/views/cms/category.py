@@ -3,6 +3,7 @@ from apps.core.error import Success, RepeatException
 from apps.core.token_auth import login_required
 from apps.models.category import Category
 from apps.utils import paginate
+from apps.utils.api_format import success_ret
 from apps.validaters.forms import CreateCategoryForm
 
 cat_api = Blueprint('category', __name__)
@@ -14,7 +15,7 @@ def get_all_cat():
     cat_name = request.args.get('category_name')
     # print(cat_name)
     cat, total = Category.get_cats(cat_name)
-    return jsonify(categorys=cat, error_code=0, total=total)
+    return success_ret(data=cat, total=total)
 
 
 @cat_api.route('/<cid>/', methods=['GET'])

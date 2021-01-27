@@ -11,7 +11,7 @@ class BaseConfig(object):
     # 分页配置
     COUNT_DEFAULT = 10  # 默认返回数量
     PAGE_DEFAULT = 0  # 默认页数
-    pass
+    SECRET_KEY = '\x88W\xf09\x91\x07\x98\x89\x87\x96\xa0A\xc68\xf9\xecJJU\x17\xc5V\xbe\x8b\xef\xd7\xd8\xd3\xe6\x95*4'
 
 
 class DevelopmentConfig(BaseConfig):
@@ -21,7 +21,7 @@ class DevelopmentConfig(BaseConfig):
     # 令牌配置
     JWT_ACCESS_TOKEN_EXPIRES = timedelta(hours=2400)
     # 数据库配置
-    MONGODB_DB = 'blog'
+    MONGODB_DB = 'LRBlog'
     MONGODB_HOST = 'localhost'
     MONGODB_POST = '27017'
     MONGODB_USERNAME = None
@@ -42,11 +42,6 @@ class DevelopmentConfig(BaseConfig):
     access_key = 'NgP597T5QzNUhCygvVIYFngUs7bzheOFtHGDtz-u'
     secret_key = 'mV7iHCAft8az-X3nE7x3gxOw1vbavFjkLEWUEGLF'
 
-    # 所有endpoint的meta信息
-    EP_META = {}
-    EP_INFO_LIST = []
-    EP_INFOS = {}
-
 
 class ProductionConfig(BaseConfig):
     """ 生产环境配置 """
@@ -55,7 +50,7 @@ class ProductionConfig(BaseConfig):
     # 令牌配置
     JWT_ACCESS_TOKEN_EXPIRES = timedelta(hours=2)
     # 数据库配置
-    MONGODB_DB = 'blog'
+    MONGODB_DB = 'LRBlog'
     MONGODB_HOST = '172.17.40.142'
     MONGODB_POST = '27017'
     MONGODB_USERNAME = None
@@ -76,7 +71,3 @@ class ProductionConfig(BaseConfig):
     access_key = 'NgP597T5QzNUhCygvVIYFngUs7bzheOFtHGDtz-u'
     secret_key = 'mV7iHCAft8az-X3nE7x3gxOw1vbavFjkLEWUEGLF'
 
-    # 所有endpoint的meta信息
-    EP_META = {}
-    EP_INFO_LIST = []
-    EP_INFOS = {}

@@ -7,8 +7,8 @@ import time
 
 from flask import request
 from wtforms import StringField, IntegerField, PasswordField, DateTimeField, \
-    BooleanField
-from wtforms.validators import DataRequired, ValidationError, length, Email, Regexp, EqualTo, Optional
+    BooleanField, FieldList, FormField, Field
+from wtforms.validators import DataRequired, length, Regexp, EqualTo, Optional
 
 from apps.validaters.base import BaseForm as Form
 
@@ -48,17 +48,16 @@ class LoginForm(Form):
     password = PasswordField('密码', validators=[DataRequired(message='密码不可为空')])
 
 
-class CreatePostForm(Form):
+class CreateArticleForm(Form):
     title = StringField(validators=[DataRequired(message='必须输入文章标题')])
     content = StringField(validators=[DataRequired(message='必须传入文章内容')])
-    post_type = IntegerField(validators=[])
+    article_type = IntegerField(validators=[])
     author = StringField(validators=[])
-    tags = StringField()
+    tags = FieldList(StringField())
     keyword = StringField()
     source = StringField()
-    author_id = StringField()
     commentsCount = IntegerField(validators=[])
-    category = StringField(validators=[])
+    category = Field()
     introduction = StringField(validators=[])
     banner = StringField(validators=[])
     is_audit = BooleanField(validators=[])
@@ -152,12 +151,13 @@ class LogFindForm(Form):
 
 class CreateTagForm(Form):
     tag_name = StringField(validators=[DataRequired(message='必须传入标签名称')])
-    alias = StringField(validators=[])
+    # remark = StringField(validators=[])
     status = BooleanField()
     thumbnail = StringField(120)
 
 
 class CreateCategoryForm(Form):
+    parent_category_name = StringField()
     category_name = StringField(validators=[DataRequired(message='必须传入标签名称')])
     thumbnail = StringField(120)
 
@@ -169,3 +169,12 @@ class CreateCommentForm(Form):
     post_id = StringField()
     # comment_user_id = StringField(validators=[DataRequired(message='必须传入评论人id')])
     reply_user_id = StringField()
+
+
+class UpdateComment(Form):
+    comment_id = StringField()
+    status = BooleanField()
+    text = StringField()
+
+# class DeleteComment(Form):
+#     comment_id = StringField()

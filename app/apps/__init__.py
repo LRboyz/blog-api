@@ -5,7 +5,7 @@
 from flask import Flask
 from flask_mongoengine import MongoEngine
 from flask_cors import CORS
-
+import os
 
 db = MongoEngine()
 
@@ -30,13 +30,14 @@ def register_blueprints(app):
     from apps.views.cms.log import log_api
     from apps.views.cms.file import file_api
     from apps.views.cms.tag import tag_api
-    from apps.views.cms.post import post_api
+    from apps.views.cms.article import article_api
     from apps.views.cms.category import cat_api
     from apps.views.cms.admin import admin_api
+    from apps.views.cms.comment import cms_comment_api
 
     # 博客前端模块API
     from apps.views.blog.index import blog_api
-    from apps.views.blog.articleDetail import article_api
+    from apps.views.blog.articleDetail import article_detail_api
     from apps.views.blog.comment import comment_api
 
     app.register_blueprint(test, url_prefix='/test')
@@ -45,12 +46,13 @@ def register_blueprints(app):
     app.register_blueprint(file_api, url_prefix='/v1')
     app.register_blueprint(book_api, url_prefix='/book')
     app.register_blueprint(tag_api, url_prefix='/tag')
-    app.register_blueprint(post_api, url_prefix='/post')
+    app.register_blueprint(article_api, url_prefix='/article')
     app.register_blueprint(cat_api, url_prefix='/category')
     app.register_blueprint(admin_api, url_prefix='/admin')
+    app.register_blueprint(cms_comment_api, url_prefix='/cms/comment')
 
     app.register_blueprint(blog_api, url_prefix='/blog')
-    app.register_blueprint(article_api, url_prefix='/article')
+    app.register_blueprint(article_detail_api, url_prefix='/article/detail')
     app.register_blueprint(comment_api, url_prefix='/blog/comment')
 
 
@@ -64,12 +66,11 @@ def create_app(environment='development'):
     app = Flask(__name__)
     app.config['ENV'] = environment
     env = app.config.get('ENV')
+    print("当前环境是：", env)
     if env == 'production':
         app.config.from_object('apps.config.setting.ProductionConfig')
-        app.config.from_object('apps.config.secure.ProductionSecure')
     elif env == 'development':
         app.config.from_object('apps.config.setting.DevelopmentConfig')
-        app.config.from_object('apps.config.secure.DevelopmentSecure')
     # app.config.from_object('apps.config.setting')
     db.init_app(app)
     # JSON序列化
@@ -78,6 +79,7 @@ def create_app(environment='development'):
     register_blueprints(app)
     # 跨域
     apply_cors(app)
+
     # 加载jwt插件
     from apps.core.token_auth import jwt
     jwt.init_app(app)

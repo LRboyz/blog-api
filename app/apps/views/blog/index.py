@@ -3,11 +3,11 @@ import random
 from flask import Blueprint, jsonify, request
 # import time
 from apps.models.category import Category
-from apps.models.post import Post
+from apps.models.article import Article
 from apps.models.tag import Tag
 from apps.models.user import User
 from apps.utils import paginate
-from apps.utils.api_format import success_ret
+from apps.utils.api_format import success_ret, api_exclude, error_ret
 
 blog_api = Blueprint('blog', __name__)
 
@@ -18,12 +18,20 @@ def article_list():
     start, count = paginate()  # 获取分页配置
     tag_name = request.args.get('tag_name')
     category_name = request.args.get('category_name')
+    keyword = request.args.get('keyword')
     if category_name:
-        posts = Post.objects(is_audit=True).filter(category__contains=category_name).skip(start).limit(count).all()
+        print(category_name)
+        posts = Post.objects(is_audit=True).order_by('-pub_time').filter(category__contains=category_name).skip(start).limit(count).all()
     elif tag_name:
-        posts = Post.tags.objects(is_audit=True).filter(tag_name__contains=tag_name).skip(start).limit(count).all()
+        print(tag_name)
+        posts = Post.objects(is_audit=True).order_by('-pub_time').filter(tags__contains=tag_name).skip(start).limit(count).all()
+    elif keyword:
+        print(keyword)
+        #  因为文章数据量不大， 固采用数据库搜索，如果数据量大可以采用 Elasticsearch 全文检索
+        posts = Post.objects(is_audit=True).order_by('-pub_time').filter(content__contains=keyword).skip(start).limit(count).all()
     else:
-        posts = Post.objects(is_audit=True).skip(start).limit(count).all()  # .exclude('author')  排除某些字段
+        print('end')
+        posts = Post.objects(is_audit=True).order_by('-pub_time').skip(start).limit(count).all()  # .exclude('author')  排除某些字段
     post = [p.to_dict() for p in posts]
     current_total = posts.count()
     total = Post.objects.all().count()
@@ -49,21 +57,21 @@ def hot_article_list():
 
 
 # 首页Tag标签列表
-@blog_api.route('tag/list', methods=['GET'])
+@blog_api.route('/tag/list', methods=['GET'])
 def blog_tag_list():
     items, total = Tag.get_tags()
     return success_ret(data=items, total=total)
 
 
 # 获取全部Tag标签列表
-@blog_api.route('tag/all', methods=['GET'])
+@blog_api.route('/tag/all', methods=['GET'])
 def blog_tag_all_list():
     items, total = Tag.get_all_tags()
     return success_ret(data=items, total=total)
 
 
 # 首页用户信息
-@blog_api.route('user')
+@blog_api.route('/user')
 def index_user_list():
     # start, count = paginate()
     users = User.objects.limit(10).all()
@@ -71,7 +79,25 @@ def index_user_list():
     return success_ret(data=user_list, msg="获取用户信息成功")
 
 
-@blog_api.route('tag/subscriber/<user_id>')
+#  获取单个Tag信息
+@blog_api.route('/tag/<tag_id>')
+def blog_tag_info(tag_id):
+    tag = Tag.objects.with_id(tag_id)
+    if tag is None:
+        return error_ret(msg="暂无此标签信息", code=404)
+    info = api_exclude(tag, '_cls')
+    return success_ret(data=info)
+
+
+# 点击Tag增加浏览
+@blog_api.route('/tag/<tag_id>', methods=['POST'])
+def blog_tag_click(tag_id):
+    res = Tag.first_or_404(tag_id)
+    res.update(inc__view_hits=1)  # 浏览量+1
+    return success_ret(msg="success, 浏览+1")
+
+
+@blog_api.route('/tag/subscriber/<user_id>')
 def subscriber(user_id):
     print(user_id)
     pass

@@ -1,8 +1,10 @@
 from flask import Blueprint, jsonify
 from apps.core.error import Success
 from apps.core.token_auth import login_required
+from apps.models.article import Article
 from apps.models.tag import Tag
 from apps.utils import paginate
+from apps.utils.api_format import success_ret
 from apps.validaters.forms import CreateTagForm
 
 tag_api = Blueprint('tag', __name__)
@@ -12,12 +14,13 @@ tag_api = Blueprint('tag', __name__)
 # @login_required
 def get_all_tag():
     items, total = Tag.get_tags()
-    return jsonify(items=items, error_code=0, total=total)
+    return success_ret(data=items, total=total)
 
 
 @tag_api.route('/<tid>/', methods=['GET'])
-@login_required
+# @login_required
 def get_tag(tid):
+
     tag = Tag.get_detail(tid)
     return jsonify(tag)
 

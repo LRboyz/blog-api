@@ -10,44 +10,44 @@ access_key = DevelopmentConfig.access_key
 secret_key = DevelopmentConfig.secret_key
 
 
-class LocalUploader(Uploader):  # 这个是把图片保存到本地的形式
+# class LocalUploader(Uploader):  # 这个是把图片保存到本地的形式
 
-    def upload(self):
-        ret = []
-        self.mkdir_if_not_exists()
-        site_domain = current_app.config.get('SITE_DOMAIN')\
-            if current_app.config.get('SITE_DOMAIN') else 'http://127.0.0.1:5000'
-        for single in self._file_storage:
-            file_md5 = self._generate_md5(single.read())
-            single.seek(0)
-            exists = File.objects(md5=file_md5).first()
-            # print(exists, single)  # <File 4> <FileStorage: 'test.png' ('image/*')>
-            if exists:
-                ret.append({
-                    "key": single.name,
-                    "id": str(exists.id),
-                    "path": exists.path,
-                    "url": site_domain + os.path.join(current_app.static_url_path, exists.path)
-                })
-            else:
-                absolute_path, relative_path, real_name = self._get_store_path(single.filename)
-                print(absolute_path, relative_path)  # /Users.../lin-cms-flask/app/assets..png, 2020/04/...png
-                secure_filename(single.filename)  # 这个是安全获取文件名，如果想不安全获取就用file.filename
-                single.save(absolute_path)  # 这个意思是 把这个文件保存到本地
-                file = File.create_file(
-                    name=real_name,
-                    path=relative_path,
-                    extension=self._get_ext(single.filename),  # single.filename: 获取文件后缀名
-                    size=self._get_size(single),  
-                    md5=file_md5
-                )
-                ret.append({
-                    "key": single.name,
-                    "id": file.id,
-                    "path": file.path,
-                    "url": site_domain + os.path.join(current_app.static_url_path, file.path)
-                })
-        return ret
+    # def upload(self):
+    #     ret = []
+    #     self.mkdir_if_not_exists()
+    #     site_domain = current_app.config.get('SITE_DOMAIN')\
+    #         if current_app.config.get('SITE_DOMAIN') else 'http://127.0.0.1:5000'
+    #     for single in self._file_storage:
+    #         file_md5 = self._generate_md5(single.read())
+    #         single.seek(0)
+    #         exists = File.objects(md5=file_md5).first()
+    #         # print(exists, single)  # <File 4> <FileStorage: 'test.png' ('image/*')>
+    #         if exists:
+    #             ret.append({
+    #                 "key": single.name,
+    #                 "id": str(exists.id),
+    #                 "path": exists.path,
+    #                 "url": site_domain + os.path.join(current_app.static_url_path, exists.path)
+    #             })
+    #         else:
+    #             absolute_path, relative_path, real_name = self._get_store_path(single.filename)
+    #             print(absolute_path, relative_path)  # /Users.../lin-cms-flask/app/assets..png, 2020/04/...png
+    #             secure_filename(single.filename)  # 这个是安全获取文件名，如果想不安全获取就用file.filename
+    #             single.save(absolute_path)  # 这个意思是 把这个文件保存到本地
+    #             file = File.create_file(
+    #                 name=real_name,
+    #                 path=relative_path,
+    #                 extension=self._get_ext(single.filename),  # single.filename: 获取文件后缀名
+    #                 size=self._get_size(single),
+    #                 md5=file_md5
+    #             )
+    #             ret.append({
+    #                 "key": single.name,
+    #                 "id": file.id,
+    #                 "path": file.path,
+    #                 "url": site_domain + os.path.join(current_app.static_url_path, file.path)
+    #             })
+    #     return ret
 
 
 class QiUploader(Uploader):  # 这个是将图片上传至七牛云对象存储服务器里

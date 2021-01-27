@@ -13,9 +13,10 @@ from apps.core.token_auth import get_tokens, login_required
 from apps.models.category import Category
 from apps.models.log import Log
 from apps.models.permissions import append_permission
-from apps.models.post import Post
+from apps.models.article import Article
 from apps.models.tag import Tag
 from apps.models.user import User
+from apps.utils.api_format import api_exclude
 from apps.utils.logger import Logger
 from apps.validaters.forms import RegisterForm, LoginForm, UpdateInfoForm, AvatarUpdateForm, ChangePasswordForm
 
@@ -69,7 +70,7 @@ def get_info():
     user_info['permissions'] = append_permission(user.role)
     user_info['is_superuser'] = True if user.role == 300 else False
     data = User.to_dict(user_info)
-    article_count = Post.objects.count()
+    article_count = Article.objects.count()
     category_count = Category.objects.count()
     tag_count = Tag.objects.count()
     data['article_count'] = article_count
@@ -115,7 +116,7 @@ def set_avatar():
 @login_required
 def get_information():
     current_user = get_current_user()  # <class 'apps.models.user.User'>
-    user_info = current_user.to_dict()
+    user_info = api_exclude(current_user, '_password')
     return jsonify(user_info)
 
 

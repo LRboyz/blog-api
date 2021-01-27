@@ -1,15 +1,15 @@
 from flask import Blueprint, jsonify
-from apps.models.post import Post
+from apps.models.article import Article
 from apps.utils.api_format import api_exclude, success_ret, error_ret
 
-article_api = Blueprint('article', __name__)
+article_detail_api = Blueprint('article_detail', __name__)
 
 
 # 文章详情
-@article_api.route('/detail/<article_id>', methods=['GET'])
+@article_detail_api.route('/detail/<article_id>', methods=['GET'])
 def article_detail(article_id):
     try:
-        res = Post.first_or_404(article_id)
+        res = Article.first_or_404(article_id)
         res.update(inc__views=1)  # 浏览量+1
         detail = api_exclude(res)
         detail['author_info'] = api_exclude(res.author)
@@ -20,10 +20,10 @@ def article_detail(article_id):
 
 
 # 文章点赞
-@article_api.route('/like/<article_id>', methods=['POST'])
+@article_detail_api.route('/like/<article_id>', methods=['POST'])
 def like_article(article_id):
     try:
-        res = Post.first_or_404(article_id)
+        res = Article.first_or_404(article_id)
         res.update(inc__likes=1)  # 浏览量+1
         detail = api_exclude(res)
         detail['author_info'] = api_exclude(res.author)
@@ -34,10 +34,10 @@ def like_article(article_id):
 
 
 # 文章归档
-@article_api.route('/archive', methods=['GET'])
+@article_detail_api.route('/archive', methods=['GET'])
 def article_archive():
     try:
-        archive, cat_number = Post.get_detail_archive()
+        archive, cat_number = Article.get_detail_archive()
         return jsonify(mag="获取归类成功", code=200, archive=archive, cat_number=cat_number)
     except Exception as e:
         print(e)

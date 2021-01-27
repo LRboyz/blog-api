@@ -60,7 +60,7 @@ def invalid_loader_callback(e):
 
 @jwt.unauthorized_loader
 def unauthorized_loader_callback(e):
-    return AuthFailed(msg='认证失败，请检查请求头或者重新登陆')
+    return AuthFailed(msg='认证失败，请检查是否登陆或者重新登陆哦！')
 
 
 @jwt.user_claims_loader

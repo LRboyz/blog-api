@@ -1,6 +1,8 @@
 # from mongoengine import *
 # from apps import db
 
+# rbac 权限， 测试权限数据，功能后期在进行编写
+
 USER_ROLE = {
     300: '超级管理员',
     100: '管理员',

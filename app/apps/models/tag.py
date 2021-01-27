@@ -6,16 +6,15 @@ from flask import current_app
 from mongoengine import *
 from apps import db
 from apps.core.error import NotFound, RepeatException
-# from apps.models.post import Post
+from apps.models.user import User
 from apps.utils import paginate
+from apps.utils.api_format import error_ret, api_exclude
 
 
 class Tag(db.DynamicDocument):
     tag_name = StringField()
-    article_count = IntField(default=0)  # 文章数量
-    # subscriber_count = IntField()  # 订阅数
-    view_hits = IntField()  # 查看点击
-    subscriber = ListField()  # 关注者
+    view_hits = IntField(default=0)  # 查看点击
+    subscriber = ListField(ReferenceField(User))  # 关注者
     thumbnail = StringField()
     status = BooleanField()
     pub_time = DateTimeField()
@@ -28,19 +27,7 @@ class Tag(db.DynamicDocument):
     }
 
     def to_dict(self):
-        tag_dict = self.to_mongo().to_dict()
-        tag_dict['id'] = tag_dict['_id']
-        del tag_dict['_id']
-        return tag_dict
-
-    # def to_dict(self):
-    #     j = self.to_json()
-    #     dicts = json.loads(j)
-    #     dicts['id'] = dicts['_id']['$oid']  # 查出来的id字段： {'$oid': '5f0c5e6e82d8036913ac39d3'}，转成id
-    #     dicts['pub_time'] = self.pub_time
-    #     dicts['update_time'] = self.update_time
-    #     del dicts['_id']  # 如果要删除id，执行这个方法
-    #     return dicts
+        return api_exclude(self, '_cls')
 
     def save(self, *args, **kwargs):
         now = datetime.datetime.now()
@@ -57,26 +44,36 @@ class Tag(db.DynamicDocument):
             return site_domain + self.thumbnail
 
     @classmethod
+    def first_or_404(cls, tid):
+        try:
+            res = cls.objects.with_id(tid)
+            if res is None:
+                return error_ret(msg="暂无此标签", code=404)
+            else:
+                return res
+        except Exception as e:
+            print(e)
+
+    @classmethod
     def create_tag(cls, form):
         exists = Tag.objects(tag_name=form.tag_name.data).first()
         if exists:
             raise RepeatException(msg="该标签名已存在")
-        tags = Tag(tag_name=form.tag_name.data, thumbnail=form.thumbnail.data, alias=form.remark.data,
-                   status=form.status.data)
+        tags = Tag(tag_name=form.tag_name.data, thumbnail=form.thumbnail.data, status=form.status.data)
         tags.save()
         return True
 
     @classmethod
     def get_tags(cls):
         start, count = paginate()  # 获取分页配置
-        tags = Tag.objects.skip(start).limit(count).all()  # .exclude('author')  排除某些字段
+        tags = cls.objects.skip(start).limit(count).all()  # .exclude('author')  排除某些字段
         items = [tag.to_dict() for tag in tags]
         total = tags.count()
         return items, total
 
     @classmethod
     def get_all_tags(cls):
-        tags = cls.objects.all()  # .exclude('author')  排除某些字段
+        tags = cls.objects.order_by('-pub_time').all()  # .exclude('author')  排除某些字段
         items = [tag.to_dict() for tag in tags]
         total = tags.count()
         return items, total
@@ -101,7 +98,7 @@ class Tag(db.DynamicDocument):
         tag = Tag.objects(id=ObjectId(tid)).first()
         if tag is None:
             raise NotFound(msg='没有找到相关标签')
-        tag.update(tag_name=form.tag_name.data, thumbnail=form.thumbnail.data, alias=form.alias.data,
+        tag.update(tag_name=form.tag_name.data, thumbnail=form.thumbnail.data,
                    status=form.status.data)
         return True
 

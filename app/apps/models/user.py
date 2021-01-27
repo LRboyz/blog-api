@@ -7,11 +7,10 @@ from flask import current_app, g
 from mongoengine import *
 from werkzeug.security import generate_password_hash, check_password_hash
 import datetime
-from apps import db
 from apps.core.error import NotFound, ParameterException
 
 
-class User(db.DynamicDocument):
+class User(DynamicDocument):
     username = StringField(max_length=128)
     nickname = StringField(max_length=128, default=None)
     avatar = StringField()
@@ -19,6 +18,7 @@ class User(db.DynamicDocument):
     create_time = DateTimeField()
     ip = StringField()
     permissions = ListField()
+    # comment = ReferenceField(Comment)
     # avatar_hash = StringField()
     update_time = DateTimeField()
     role = IntField(max_length=32, default=0)  # choices=ROLES
@@ -40,23 +40,8 @@ class User(db.DynamicDocument):
         user_dict = self.to_mongo().to_dict()
         user_dict['id'] = user_dict['_id']
         del user_dict['_id']
+        del user_dict['_password']
         return user_dict
-
-    # def to_dict(self):
-    #     user_dict = {
-    #         "user_id": str(self.id),
-    #         "username": self.username,
-    #         "nickname": self.nickname,
-    #         "avatar": self.avatar,
-    #         "create_time": self.create_time,
-    #         "permissions": self.permissions,
-    #         "role": self.role,
-    #         "is_superuser": self.is_superuser,
-    #         "last_login": self.last_login,
-    #         "email": self.email,
-    #         "ip": self.ip
-    #     }
-    #     return user_dict
 
     @property  # 这个装饰器起到只读的作用
     def set_avatar(self):

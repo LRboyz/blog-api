@@ -6,6 +6,7 @@ from mongoengine import *
 from apps import db
 from apps.core.error import NotFound
 from apps.utils import paginate
+from apps.utils.api_format import api_exclude
 
 
 class Category(db.DynamicDocument):
@@ -13,6 +14,8 @@ class Category(db.DynamicDocument):
     thumbnail = StringField()
     pub_time = DateTimeField()
     update_time = DateTimeField()
+    status = BooleanField()
+    is_public = BooleanField(default=True)
 
     meta = {
         'allow_inheritance': True,
@@ -42,7 +45,8 @@ class Category(db.DynamicDocument):
 
     @classmethod
     def create_cat(cls, form):
-        category = Category(category_name=form.category_name.data, thumbnail=form.thumbnail.data)
+        category = Category(parent_category_name=form.parent_category_name.data,
+                            category_name=form.category_name.data, thumbnail=form.thumbnail.data)
         category.save()
         return True
 
@@ -53,9 +57,7 @@ class Category(db.DynamicDocument):
             categories = Category.objects.filter(category_name__icontains=cat_name)  # 查询字段包含cat_name的对象
         else:
             categories = Category.objects.skip(start).limit(count).all()  # .exclude('author')  排除某些字段
-        if not categories:
-            raise NotFound(msg='没有找到分类')
-        cats = [cat.to_dict() for cat in categories]
+        cats = [api_exclude(cat) for cat in categories]
         total = categories.count()
         return cats, total
 

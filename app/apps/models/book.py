@@ -65,9 +65,6 @@ class Book(db.Document):
     @classmethod
     def get_books(cls):
         books = Book.objects.all()  # .exclude('author')  排除某些字段
-        if not books:
-            raise NotFound(msg='没有找到相关书籍')
-        print(books)
         data = [book.to_dict() for book in books]
         return data
 

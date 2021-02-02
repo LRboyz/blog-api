@@ -35,7 +35,7 @@ def register():
         if email:
             raise RepeatException(msg='该邮箱已被注册，请重新输入')
     _register_user(form)
-    return Success(msg="用户创建成功!", error_code=200)
+    return Success(msg="用户创建成功!", code=200)
 
 
 @user_api.route('/token', methods=['POST'])

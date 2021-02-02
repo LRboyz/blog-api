@@ -12,13 +12,13 @@ __author__ = '刘锐'
 class APIException(HTTPException):
     code = 500  # http 状态码
     msg = '服务器未知错误'  # 异常信息
-    error_code = 999  # 约定的异常码
+    res_code = 999  # 约定的异常码
 
-    def __init__(self, code=None, error_code=None, msg=None, headers=None):
+    def __init__(self, code=None, res_code=None, msg=None, headers=None):
         if code:
             self.code = code
-        if error_code:
-            self.error_code = error_code
+        if res_code:
+            self.res_code = res_code
         if msg:
             self.msg = msg
         super(APIException, self).__init__()
@@ -26,7 +26,7 @@ class APIException(HTTPException):
     def get_body(self, environ=None):
         body = dict(
             msg=self.msg,
-            error_code=self.error_code,
+            res_code=self.res_code,
             request_url=request.method + ' ' + self.get_url_no_param()
         )
         text = json.dumps(body)  # 返回文本
@@ -47,25 +47,25 @@ class APIException(HTTPException):
 ############################################
 class Success(APIException):
     code = 200
-    error_code = 200
+    res_code = 200
     msg = '成功'
 
 
 class ServerError(APIException):
     code = 500
-    error_code = 999
+    res_code = 999
     msg = '服务器端异常'
 
 
 class Forbidden(APIException):
     code = 401
     msg = '不可操作'
-    error_code = 10070
+    res_code = 10070
 
 
 class Failed(APIException):
     code = 400
-    error_code = 9999
+    res_code = 9999
     msg = '失败'
 
 
@@ -77,84 +77,84 @@ class Failed(APIException):
 class AuthFailed(APIException):
     code = 401
     msg = '认证失败'
-    error_code = 10000
+    res_code = 10000
 
 
 class NotFound(APIException):
     code = 404
     msg = '资源不存在'
-    error_code = 10020
+    res_code = 10020
 
 
 class ParameterException(APIException):
     code = 400
     msg = '参数错误'
-    error_code = 10030
+    res_code = 10030
 
 
 class PasswordException(APIException):
     code = 402
     msg = '密码校验错误'
-    error_code = 10031
+    res_code = 10031
 
 
 class InvalidTokenException(APIException):
     code = 401
     msg = '令牌失效'
-    error_code = 10040
+    res_code = 10040
 
 
 class ExpiredTokenException(APIException):
     code = 422
     msg = '令牌过期'
-    error_code = 10050
+    res_code = 10050
 
 
 class RefreshException(APIException):
     code = 401
     msg = "refresh token 获取失败"
-    error_code = 10100
+    res_code = 10100
 
 
 class UnknownException(APIException):
     code = 500
     msg = '服务器未知错误'
-    error_code = 999
+    res_code = 999
 
 
 class RepeatException(APIException):
     code = 400
     msg = '字段重复'
-    error_code = 10060
+    res_code = 10060
 
 
 class Forbidden(APIException):
     code = 401
     msg = '不可操作'
-    error_code = 10070
+    res_code = 10070
 
 
 class RefreshException(APIException):
     code = 401
     msg = 'refresh token 获取失败'
-    error_code = 10100
+    res_code = 10100
 
 
 class FileTooLargeException(APIException):
     code = 413
     msg = '文件体积过大'
-    error_code = 10110
+    res_code = 10110
 
 
 class FileTooManyException(APIException):
     code = 413
     msg = '文件数量过多'
-    error_code = 10120
+    res_code = 10120
 
 
 class FileExtensionException(APIException):
     code = 401
     msg = '文件扩展名不符合规范'
-    error_code = 10130
+    res_code = 10130
 
 

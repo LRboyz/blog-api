@@ -40,20 +40,20 @@ def register_blueprints(app):
     from apps.views.blog.articleDetail import article_detail_api
     from apps.views.blog.comment import comment_api
 
-    app.register_blueprint(test, url_prefix='/test')
-    app.register_blueprint(user_api, url_prefix='/user')
-    app.register_blueprint(log_api, url_prefix='/v1')
-    app.register_blueprint(file_api, url_prefix='/v1')
-    app.register_blueprint(book_api, url_prefix='/book')
-    app.register_blueprint(tag_api, url_prefix='/tag')
-    app.register_blueprint(article_api, url_prefix='/article')
-    app.register_blueprint(cat_api, url_prefix='/category')
-    app.register_blueprint(admin_api, url_prefix='/admin')
-    app.register_blueprint(cms_comment_api, url_prefix='/cms/comment')
+    app.register_blueprint(test, url_prefix='/api/test')
+    app.register_blueprint(user_api, url_prefix='/api/user')
+    app.register_blueprint(log_api, url_prefix='/api/v1')
+    app.register_blueprint(file_api, url_prefix='/api/v1')
+    app.register_blueprint(book_api, url_prefix='/api/book')
+    app.register_blueprint(tag_api, url_prefix='/api/tag')
+    app.register_blueprint(article_api, url_prefix='/api/article')
+    app.register_blueprint(cat_api, url_prefix='/api/category')
+    app.register_blueprint(admin_api, url_prefix='/api/admin')
+    app.register_blueprint(cms_comment_api, url_prefix='/api/comment')
 
-    app.register_blueprint(blog_api, url_prefix='/blog')
-    app.register_blueprint(article_detail_api, url_prefix='/article/detail')
-    app.register_blueprint(comment_api, url_prefix='/blog/comment')
+    app.register_blueprint(blog_api, url_prefix='/api/blog')
+    app.register_blueprint(article_detail_api, url_prefix='/api/article/detail')
+    app.register_blueprint(comment_api, url_prefix='/api/blog/comment')
 
 
 def create_app(environment='development'):

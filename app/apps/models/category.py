@@ -57,7 +57,7 @@ class Category(db.DynamicDocument):
             categories = Category.objects.filter(category_name__icontains=cat_name)  # 查询字段包含cat_name的对象
         else:
             categories = Category.objects.skip(start).limit(count).all()  # .exclude('author')  排除某些字段
-        cats = [api_exclude(cat) for cat in categories]
+        cats = [api_exclude(cat, '_cls') for cat in categories]
         total = categories.count()
         return cats, total
 

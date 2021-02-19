@@ -37,7 +37,7 @@ def update_article(aid):
 def get_article(aid):
     # keyword = request.args.get('searchKeyword')
     article, total = Article.get_article(aid)
-    return jsonify(article=article, error_code=0, total=total)
+    return success_ret(data=article, total=total)
 
 
 @article_api.route('/<aid>/', methods=['DELETE'])

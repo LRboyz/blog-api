@@ -4,8 +4,6 @@
   各种提交表单的验证
 """
 import time
-
-from flask import request
 from wtforms import StringField, IntegerField, PasswordField, DateTimeField, \
     BooleanField, FieldList, FormField, Field
 from wtforms.validators import DataRequired, length, Regexp, EqualTo, Optional

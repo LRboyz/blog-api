@@ -56,13 +56,6 @@ class Article(Document):
         self.update_time = now
         return super(Article, self).save(*args, **kwargs)
 
-    # def to_dict(self):
-    #     article_dict = self.to_mongo().to_dict()
-    #     article_dict['id'] = article_dict['_id']
-    #     article_dict['author'] = [user.to_dict() for user in User.objects(id=ObjectId(self.author_id))]
-    #     del article_dict['_id']
-    #     return article_dict
-
     @classmethod
     def first_or_404(cls, pid):
         try:
@@ -74,28 +67,21 @@ class Article(Document):
         except Exception as e:
             print(e)
 
-        # pass
-
     @classmethod
     def create_article(cls, form):
         article = cls.objects(title=form.title.data).first()
         if article is not None:
             raise ParameterException(msg='文章已存在')
-        # tags = cls.update_tag_field(form.tags.data)
-        # tags = [Tag(tag_name=item).save() for item in form.tags.data]
-        # category = [Category(category_name=item).save() for item in form.category.data]
         article = Article(title=form.title.data, banner=form.banner.data,
                           content=form.content.data,
                           recommend=form.recommend.data, keyword=form.keyword.data, source=form.source.data,
                           is_audit=form.is_audit.data, article_type=form.article_type.data,
                           introduction=form.introduction.data)
-        article.category = ObjectId(form.category.data)
-        article.tags = [ObjectId(tag_id) for tag_id in form.tags.data]
+        if form.category.data:
+            article.category = ObjectId(form.category.data)
+        article.tags = [ObjectId(tag_id) for tag_id in form.tags.data if len(form.tags.data) > 0]
         article.save()
         return True
-        # user = get_current_user()
-        # user_info = User.objects(id=user.id).first()
-        # user_info.save()
 
         # if form.tags.data:  # 这个逻辑是找出来这个标签所对应的文章，用聚合查询
         #     tag_group = cls._get_collection().aggregate([
@@ -130,9 +116,11 @@ class Article(Document):
         else:
             articles = Article.objects.skip(start).limit(count).all()  # .exclude('author')  排除某些字段
         article_list = []
+        category = {}
         for item in articles:
-            category = api_exclude(item.category, '_cls')
-            tags = [api_exclude(tag, '_cls') for tag in item.tags]
+            if item.category:
+                category = api_exclude(item.category, '_cls')
+            tags = [api_exclude(tag, '_cls') for tag in item.tags if item.tags]
             article_list.append(api_exclude(item, '_cls'))
             for article in article_list:
                 article['category'] = category
@@ -153,10 +141,12 @@ class Article(Document):
         article = Article.objects(id=ObjectId(aid)).first()
         if article is None:
             raise NotFound(msg='没有找到相关文章')
-        article.update(title=form.title.data, banner=form.banner.data,content=form.content.data,
-                       category=form.category.data, tags=form.tags.data, recommend=form.recommend.data,
-                       keyword=form.keyword.data, source=form.source.data, is_audit=form.is_audit.data,
-                       article_type=form.article_type.data, introduction=form.introduction.data)
+        article.update(title=form.title.data, banner=form.banner.data, content=form.content.data,
+                       category=ObjectId(form.category.data),
+                       tags=[ObjectId(tag_id) for tag_id in form.tags.data if len(form.tags.data) > 0],
+                       recommend=form.recommend.data, keyword=form.keyword.data, source=form.source.data,
+                       is_audit=form.is_audit.data, article_type=form.article_type.data,
+                       introduction=form.introduction.data)
         return True
 
     @classmethod
